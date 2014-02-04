@@ -1,0 +1,239 @@
+
+Introduction
+------------
+
+Set a rough environment to test operations of a double linked list (dlist) consisted of integers.
+
+
+External Specification
+----------------------
+
+To start the program, execute "dlist" in command line.
+A empty dlist is created implicitly and the prompt sign ">>" shows and wait user to type commands.
+After finishing a command, the prompt sign ">>" shows repeatedly until "quit" command is inputed by user.
+
+The following commands can be used to manipulate the dlist. 
+"printall" : print all contents in dlist
+"len" : print size of dlist
+"append data" : insert data into index len, and increment dlist size by 1
+"insert idx data" : insert data item into index between 0 and len-1
+"delete idx" : delete data item of index between 0 and len-1
+"quit" : quit the program
+
+
+Internal Specification
+----------------------
+
+Main Flow:
+
+while (1)
+{
+    printf(">> ");
+    get command line string
+    parse command string into command, arg1, arg2 
+    verify command, 
+        if unknown command then continue getting command line string again
+        else go on
+
+    switch command
+
+        case printall:
+            do printall function
+            break
+
+        case len:
+            do len function
+            break
+
+        case append data:
+            do append function with arg1
+            break
+
+        case insert idx data:
+            do insert function with arg1, arg2
+            break
+
+        case delete idx:
+            do delete function with arg1
+            break
+
+        case quit:
+            clean dlist
+            printf("Bye!\n");
+            break
+}
+
+
+
+1. Initially, a dlist is composed of a counter "dlist_size" and a pointer "dlist".
+dlist is a circular doubly linked list.
+
+struct dlist_node_t
+{
+    unsigned int data;
+    struct dlist_node_t *prev;
+    struct dlist_node_t *next;
+};
+
+unsigned int dlist_size = 0;
+struct dlist_node_t *dlist = NULL;
+
+
+2. printall
+
+printf("[");
+
+nodep = dlist;
+for (idx = 0; idx < dlist_size; )
+{
+    printf("%d", nodep->data);
+
+    nodep = nodep->next;
+    idx++;
+    if (idx != dlist_size)
+        printf(", ");
+}
+
+printf("]\n");
+
+
+
+3. len
+
+printf("%d\n", dlist_size);
+
+
+4. append data(arg1)
+
+insert dlist_size arg1
+
+
+5. insert idx(arg1) data(arg2)
+
+verify idx(arg1) in [0..dlist_size]
+
+make new node with data(arg2) and new_node_p
+
+get node_of_idx_p
+    if dlist_size is 0
+        node_of_idx_p = new_node_p 
+    else
+        node_of_idx_p = dlist;
+        for (i = 0; i < idx; i++)
+            node_of_idx_p = node_of_idx_p->next;
+
+get prev_node_of_idx_p
+    if dlist_size is 0
+        prev_node_of_idx_p = new_node_p
+    else
+        prev_node_of_idx_p = node_of_idx_p->prev
+
+
+new_node_p->next = node_of_idx_p
+new_node_p->prev = prev_node_of_idx_p
+
+node_of_idx_p->prev = new_node_p 
+prev_node_of_idx_p->next = new_node_p 
+
+if idx is 0
+    dlist = new_node_p
+
+increase dlist_size
+
+
+6. delete idx(arg1)
+
+verify dlist_size is not 0 
+verify idx(arg1) in [0..dlist_size-1]
+
+get node_of_idx_p
+    node_of_idx_p = dlist;
+    for (i = 0; i < idx; i++)
+        node_of_idx_p = node_of_idx_p->next;
+
+get next_node_of_idx_p
+    next_node_of_idx_p = node_of_idx_p->next
+
+get prev_node_of_idx_p
+    prev_node_of_idx_p = node_of_idx_p->prev
+
+if idx is 0
+    dlist = next_node_of_idx_p
+
+next_node_of_idx_p->prev = prev_node_of_idx_p
+prev_node_of_idx_p->next = next_node_of_idx_p
+
+decrease dlist_size 
+if dlist_size is 0
+    dlist = NULL
+
+free node_of_idx_p
+
+
+
+
+7. On quit, deleting all nodes
+
+for (i = 0; i < dlist_size; i++)
+    delete 0
+
+
+
+
+
+
+
+Test Plan
+---------
+
+dlist = []
+
+>> printall
+[]
+
+>> len
+0
+
+>> delete 0
+dlist is already empty.
+[]
+
+>> insert 1 1
+index 1 is out of range.
+[]
+
+>> append 1
+[1]
+
+>> printall
+[1]
+
+>> len
+1
+
+>> delete 0
+[]
+
+>> insert 0 1
+[1]
+
+>> append 2
+[1, 2]
+
+>> printall
+[1, 2]
+
+>> len
+2
+
+>> insert 1 3
+[1, 3, 2]
+
+>> append 4
+[1, 3, 2, 4]
+
+>> delete 2
+[1, 3, 4]
+
+
+
